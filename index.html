@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FrameAlloc — OS Memory Lab</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand"><div class="brand-icon">▦</div><div><strong>FrameAlloc</strong><small>OS MEMORY LAB</small></div></div>
+      <div class="nav-label">WORKSPACE</div>
+      <button class="nav-item active" data-view="simulator"><span>◫</span> Allocation Simulator</button>
+      <button class="nav-item" data-view="comparison"><span>⇄</span> Algorithm Comparison</button>
+      <button class="nav-item" data-view="research"><span>⌘</span> Research Extension</button>
+      <div class="sidebar-bottom"><div class="status-dot"></div><span>Simulation environment</span><strong>LOCAL</strong></div>
+    </aside>
+    <main class="main">
+      <header class="topbar"><div><div class="eyebrow">OPERATING SYSTEMS / SLA PROJECT</div><h1>Page &amp; Frame Allocation</h1><p>Explore how the OS distributes limited physical memory across processes.</p></div><div class="top-actions"><span class="pill"><span class="live-dot"></span> Interactive demo</span><button id="resetBtn" class="ghost-btn">↻ Reset</button></div></header>
+      <section class="metrics">
+        <article class="metric-card"><div class="metric-head"><span>PHYSICAL FRAMES</span><span class="metric-icon">▦</span></div><div class="metric-value" id="metricFrames">32</div><div class="metric-foot">Available memory blocks</div></article>
+        <article class="metric-card"><div class="metric-head"><span>ACTIVE PROCESSES</span><span class="metric-icon">▤</span></div><div class="metric-value" id="metricProcesses">3</div><div class="metric-foot">Competing for memory</div></article>
+        <article class="metric-card"><div class="metric-head"><span>ALLOCATED FRAMES</span><span class="metric-icon">◧</span></div><div class="metric-value" id="metricAllocated">32 <small>/ 32</small></div><div class="metric-foot">Frames assigned by policy</div></article>
+        <article class="metric-card"><div class="metric-head"><span>MEMORY UTILIZATION</span><span class="metric-icon">◔</span></div><div class="metric-value" id="metricUtil">100<span class="unit">%</span></div><div class="util-track"><div id="utilBar"></div></div></article>
+      </section>
+
+      <section class="workspace-grid">
+        <article class="panel controls-panel">
+          <div class="panel-title"><div><h2>Simulation controls</h2><p>Configure memory and choose a policy</p></div><span class="step-tag">01 / INPUT</span></div>
+          <label for="algorithm">Allocation algorithm</label>
+          <select id="algorithm">
+            <option value="proportional">Proportional allocation</option>
+            <option value="equal">Equal allocation</option>
+            <option value="priority">Priority-based allocation</option>
+            <option value="working">Working-set allocation (research)</option>
+          </select>
+          <div class="form-row"><label for="frameCount">Available frames</label><strong id="frameCountLabel">32</strong></div>
+          <input id="frameCount" type="range" min="6" max="80" value="32">
+          <div class="range-labels"><span>6 frames</span><span>80 frames</span></div>
+          <div class="section-line"><h3>Process requirements</h3><button id="addProcess" class="text-btn">＋ Add process</button></div>
+          <div id="processList" class="process-list"></div>
+          <button id="runBtn" class="primary-btn">▶ Run allocation simulation</button>
+          <p class="hint">Tip: Change process sizes or priorities and rerun to see how allocations shift.</p>
+        </article>
+
+        <article class="panel result-panel">
+          <div class="panel-title"><div><h2>Allocation overview</h2><p id="resultSubtitle">Proportional distribution across process sizes</p></div><span class="step-tag">02 / OUTPUT</span></div>
+          <div class="result-summary"><div><span class="summary-label">Policy selected</span><strong id="policyName">Proportional</strong></div><div><span class="summary-label">Unallocated</span><strong id="unusedFrames">0 frames</strong></div><div><span class="summary-label">Distribution</span><strong id="distributionText">Size weighted</strong></div></div>
+          <div class="allocation-list" id="allocationList"></div>
+          <div class="frame-map-head"><h3>Physical frame map</h3><span>Each block = 1 frame</span></div>
+          <div id="frameMap" class="frame-map"></div>
+          <div class="legend"><span><i class="legend-p1"></i> P1</span><span><i class="legend-p2"></i> P2</span><span><i class="legend-p3"></i> P3</span><span><i class="legend-free"></i> Free</span></div>
+          <div class="result-note" id="resultNote">Allocation is calculated using the largest-remainder method so integer allocations sum to the available frame count.</div>
+        </article>
+      </section>
+
+      <section class="panel comparison-panel" id="comparisonSection">
+        <div class="panel-title"><div><h2>Algorithm comparison</h2><p>Compare how the same workload is distributed by each policy</p></div><span class="step-tag">03 / ANALYSIS</span></div>
+        <div class="table-wrap"><table><thead><tr><th>PROCESS</th><th>PAGES REQUIRED</th><th>EQUAL</th><th>PROPORTIONAL</th><th>PRIORITY</th><th>WORKING SET</th></tr></thead><tbody id="comparisonBody"></tbody><tfoot id="comparisonFoot"></tfoot></table></div>
+        <div class="comparison-insight"><div class="insight-icon">✦</div><div><strong id="insightTitle">What this tells us</strong><p id="insightText">Proportional allocation gives larger processes a larger share of memory. Equal allocation treats every process identically.</p></div></div>
+      </section>
+      <section class="panel research-panel" id="researchSection">
+        <div class="panel-title"><div><h2>Research extension · Dynamic working set</h2><p>A simplified model inspired by working-set-driven allocation research</p></div><span class="step-tag">04 / EXTENSION</span></div>
+        <div class="research-grid"><div><div class="research-number">01</div><strong>Estimate active demand</strong><p>Use each process's working-set estimate rather than total process size.</p></div><div><div class="research-number">02</div><strong>Recalculate frame shares</strong><p>Distribute frames according to the recent active-memory demand.</p></div><div><div class="research-number">03</div><strong>Observe changes</strong><p>Adjust working-set values to simulate a changing workload.</p></div></div>
+        <p class="research-disclaimer">Educational simulation only: this interface models allocation policies, not a real operating system's physical memory manager. Page-fault rates require a page-reference trace and a replacement policy.</p>
+      </section>
+      <footer>FRAMEALLOC <span>•</span> Operating Systems Self-Learning Activity <span class="footer-right">Page / Frame Allocation Algorithms</span></footer>
+    </main>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
